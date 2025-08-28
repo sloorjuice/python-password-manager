@@ -35,10 +35,28 @@ def get_master_password(data):
     if "master" not in data:
         master = input("Set a master password: ")
         data["master"] = master
-        data["accounts"] = {} # ensure accounts section exists
+        data["accounts"] = [] # ensure accounts section exists
         save_data(data)
         print("Master password set!")
         return
+
+def validate_email(email):
+    return True
+
+def validate_pw(pw):
+    return True
+
+def save_account(title, email, pw, data):
+    if validate_email(email) and validate_pw(pw):
+        new_account = {
+            "title": title,
+            "email": email,
+            "password": pw
+        }
+
+        data["accounts"].append(new_account)
+        save_data(data)
+        print("Saved Account.")
 
 def main():
     data = load_data()
@@ -46,11 +64,16 @@ def main():
     login_user(data)
 
     while True:
-        print("\nOptions: quit")
+        print("\nOptions: quit, save")
         choice = input("> ")
 
         if choice == "quit":
             break
+        if choice == "save":
+            title = input("Whats a title for your account? (e.g. Website, App, etc)")
+            email = input(f"Whats your email for {title}? ")
+            pw = input(f"Whats your password for {title}? ")
+            save_account(title, email, pw, data)
         else:
             print("Not a valid command.")
 
