@@ -4,10 +4,13 @@ import os
 PWDB = 'passwords.json'
 
 def load_data():
-    if not os.path.exists(PWDB):
-        return {}
-    with open(PWDB, "r") as f:
-        return json.load(f)
+    try:
+        if not os.path.exists(PWDB):
+            return {}
+        with open(PWDB, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error trying to load data: {e}")
 
 def save_data(data):
     try:
@@ -30,13 +33,12 @@ def login_user(data):
 
 def get_master_password(data):
     if "master" not in data:
-        # no master password yet -> set it up
         master = input("Set a master password: ")
         data["master"] = master
         data["accounts"] = {} # ensure accounts section exists
         save_data(data)
         print("Master password set!")
-        return data["master"]
+        return
 
 def main():
     data = load_data()
