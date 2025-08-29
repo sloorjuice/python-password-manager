@@ -40,6 +40,10 @@ def get_master_password(data):
         print("Master password set!")
         return
 
+def list_accounts(data):
+    for account in data["accounts"]:
+        print(f"{account['title']}: Email: {account['email']}, Password: {account['password']}")
+
 def validate_email(email):
     return True
 
@@ -64,16 +68,18 @@ def main():
     login_user(data)
 
     while True:
-        print("\nOptions: quit, save")
+        print("\nOptions: quit, save, list")
         choice = input("> ")
 
         if choice == "quit":
             break
-        if choice == "save":
+        elif choice == "save":
             title = input("Whats a title for your account? (e.g. Website, App, etc)")
             email = input(f"Whats your email for {title}? ")
             pw = input(f"Whats your password for {title}? ")
             save_account(title, email, pw, data)
+        elif choice == "list":
+            list_accounts(data)
         else:
             print("Not a valid command.")
 
