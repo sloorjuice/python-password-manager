@@ -1,11 +1,5 @@
-import json
-import os
-import getpass
-import secrets
-import string
-import re
+import json, os, getpass, secrets, string, re, base64, hashlib
 from cryptography.fernet import Fernet
-import base64, hashlib
 
 DATABASE_FILE = 'configs/passwords.json'
 SALT_FILE = 'configs/salt.bin'
