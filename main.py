@@ -10,6 +10,8 @@ import base64, hashlib
 DATABASE_FILE = 'configs/passwords.json'
 SALT_FILE = 'configs/salt.bin'
 
+# -----------------------------ENCRYPTION-----------------------------
+
 def generate_salt():
     return secrets.token_bytes(16)
 
@@ -34,6 +36,22 @@ def derive_key_from_password(password: str, salt: bytes) -> bytes:
         dklen=32
     )
     return base64.urlsafe_b64encode(key)
+
+def encrypt_password(pw: str, key: bytes) -> bytes:
+    """Encrypt the password using the provided key."""
+    f = Fernet(key)
+    return f.encrypt(pw.encode()).decode()
+
+def decrypt_password(encrypted_pw: str, key: bytes) -> str:
+    """Decrypt the password using the provided key."""
+    try:
+        f = Fernet(key)
+        return f.decrypt(encrypted_pw.encode()).decode()
+    except Exception as e:
+        print(f"Error: Unable to decrypt password. Wrong key or corrupted data: {e}")
+        return ""
+
+# -----------------------------CONFIGURATION-----------------------------
 
 def load_data() -> dict:
     """Load data from a JSON file and return it."""
@@ -62,28 +80,6 @@ def save_data(data: dict):
     except Exception as e:
         print(f"Error trying to save data: {e}")
 
-def login_user(data: dict) -> str:
-    """Log in the user by verifying the master password."""
-    attempt = getpass.getpass("Enter master password: ")
-
-    salt = load_salt()
-    if not salt:
-        print("No salt found! Exiting.")
-        exit()
-    key = derive_key_from_password(attempt, salt)
-    master = decrypt_password(data.get("master"), key)
-
-    # ensure_configs_dir()
-    # key = load_key()
-    # master = decrypt_password(data.get("master"), key)
-
-    if attempt != master:
-        print("Incorrect master password! Exiting.")
-        exit()
-
-    print("Access Granted.")
-    return attempt
-
 def check_master_password(data: dict):
     """
     Get the master password from the user.
@@ -109,16 +105,29 @@ def check_master_password(data: dict):
         save_data(data)
         print("Master password set!")
 
-def list_accounts(master_pw: str, data: dict):
-    """List all saved accounts."""
+# -----------------------------ACCOUNT MANAGEMENT-----------------------------
+
+def login_user(data: dict) -> str:
+    """Log in the user by verifying the master password."""
+    attempt = getpass.getpass("Enter master password: ")
+
     salt = load_salt()
-    key = derive_key_from_password(master_pw, salt)
-    for account in data["accounts"]:
-        decrypted_pw = decrypt_password(account["password"], key)
-        if account.get("email"):
-            print(f"{account['title']}: Email: {account['email']}, Password: {decrypted_pw}")
-        else:
-            print(f"{account['title']}: Username: {account['username']}, Password: {decrypted_pw}")
+    if not salt:
+        print("No salt found! Exiting.")
+        exit()
+    key = derive_key_from_password(attempt, salt)
+    master = decrypt_password(data.get("master"), key)
+
+    # ensure_configs_dir()
+    # key = load_key()
+    # master = decrypt_password(data.get("master"), key)
+
+    if attempt != master:
+        print("Incorrect master password! Exiting.")
+        exit()
+
+    print("Access Granted.")
+    return attempt
 
 def validate_email(email: str) -> bool:
     """Email validation using regex."""
@@ -169,6 +178,31 @@ def save_account(title: str, identifier: str, pw: str, account_type: str, mpw: s
     save_data(data)
     print("Saved Account.")
 
+def remove_account(data: dict):
+    """Remove an existing account."""
+    title = input("Enter the title of the account to remove: ")
+    found = False
+    for account in data.get("accounts", []):
+        if account["title"] == title:
+            data["accounts"].remove(account)
+            save_data(data)
+            print("Account removed.")
+            found = True
+            break
+    if not found:
+        print("Account not found.")
+
+def list_accounts(master_pw: str, data: dict):
+    """List all saved accounts."""
+    salt = load_salt()
+    key = derive_key_from_password(master_pw, salt)
+    for account in data["accounts"]:
+        decrypted_pw = decrypt_password(account["password"], key)
+        if account.get("email"):
+            print(f"{account['title']}: Email: {account['email']}, Password: {decrypted_pw}")
+        else:
+            print(f"{account['title']}: Username: {account['username']}, Password: {decrypted_pw}")
+
 def setup_account(master_pw: str, data: dict):
     """Set up a new account with a generated password."""
     title = input("Whats a title for your account? (e.g. Website, App, etc) ")
@@ -198,34 +232,6 @@ def setup_account(master_pw: str, data: dict):
         save_account(title, identifier, pw, account_type, master_pw, data)
     else:
         print("Invalid choice.")
-
-def remove_account(data: dict):
-    """Remove an existing account."""
-    title = input("Enter the title of the account to remove: ")
-    found = False
-    for account in data.get("accounts", []):
-        if account["title"] == title:
-            data["accounts"].remove(account)
-            save_data(data)
-            print("Account removed.")
-            found = True
-            break
-    if not found:
-        print("Account not found.")
-
-def encrypt_password(pw: str, key: bytes) -> bytes:
-    """Encrypt the password using the provided key."""
-    f = Fernet(key)
-    return f.encrypt(pw.encode()).decode()
-
-def decrypt_password(encrypted_pw: str, key: bytes) -> str:
-    """Decrypt the password using the provided key."""
-    try:
-        f = Fernet(key)
-        return f.decrypt(encrypted_pw.encode()).decode()
-    except Exception as e:
-        print(f"Error: Unable to decrypt password. Wrong key or corrupted data: {e}")
-        return ""
 
 def main():
     try:
