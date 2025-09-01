@@ -311,8 +311,8 @@ def main():
            "[s] Save Account",
             "[l] List Accounts",
             "[r] Remove Account",
-            "[o] Export Accounts",
             "[e] Edit Account",
+            "[o] Export Accounts",
             # "[c] Change Master Password",
             "[q] Quit"
         ]
@@ -336,7 +336,7 @@ def main():
                 remove_account(data)
             elif choice == "[e] Edit Account":
                 edit_account(master_pw, data) 
-            elif choice == "[e] Export Accounts":
+            elif choice == "[o] Export Accounts":
                 export_accounts(master_pw, data)
             else:
                 print("Not a valid command.")
