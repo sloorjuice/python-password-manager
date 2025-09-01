@@ -1,5 +1,5 @@
 # Python Password Manager CLI
-This is a full Password Manager I created with Python.
+This is a full Password Manager I created in Python.
 Built with a quality CLI for easily saving, deleting, editing, viewing and exporting your accounts.
 - Accounts can have emails and usernames, phone numbers coming soon.
 - Passwords are stored in a Json with AES-128 encryption with fernett which also provides HMAC auth.
