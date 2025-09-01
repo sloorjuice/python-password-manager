@@ -1,4 +1,4 @@
-import json, os, getpass, secrets, string, re, base64, hashlib
+import json, os, getpass, secrets, string, re, base64, hashlib, csv
 from cryptography.fernet import Fernet
 
 DATABASE_FILE = 'configs/passwords.json'
@@ -227,6 +227,24 @@ def setup_account(master_pw: str, data: dict):
     else:
         print("Invalid choice.")
 
+def export_accounts(data: dict):
+    print("Exporting Data..")
+    try:
+        accounts = data.get("accounts", [])
+        if not accounts:
+            print("No accounts to export..")
+            return
+
+        with open("accounts.csv", mode="w", newline="", encoding="utf-8") as file:
+            fieldnames = accounts[0].keys()
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+            writer.writeheader()
+            writer.writerows(data)
+        print("Succesfully Exported Data.")
+    except Exception as e:
+        print(f"Error exporting data: {e}")
+
 def main():
     try:
         data = load_data()
@@ -234,7 +252,7 @@ def main():
         master_pw = login_user(data)
 
         while True:
-            print("\nOptions: quit, save, remove, list")
+            print("\nOptions: quit, save, remove, list, export")
             choice = input("> ")
 
             if choice == "quit":
@@ -245,6 +263,8 @@ def main():
                 list_accounts(master_pw, data)
             elif choice == "remove":
                 remove_account(data)
+            elif choice == "export":
+                export_accounts(data)
             else:
                 print("Not a valid command.")
     except KeyboardInterrupt:
