@@ -1,5 +1,6 @@
 import json, os, getpass, secrets, string, re, base64, hashlib, csv
 from cryptography.fernet import Fernet
+from simple_term_menu import TerminalMenu
 
 DATABASE_FILE = 'configs/passwords.json'
 SALT_FILE = 'configs/salt.bin'
@@ -186,16 +187,59 @@ def remove_account(data: dict):
     if not found:
         print("Account not found.")
 
+def edit_account(master_pw: str, data: dict):
+    accounts = data.get("accounts", [])
+    if not accounts:
+        print("No accounts to edit.")
+        return
+    
+    titles =  [acc["title"] for acc in accounts]
+    title_menu = TerminalMenu(titles, title="Select an account to edit:")
+    idx = title_menu.show()
+    if idx is None:
+        return
+    account = accounts[idx]
+    
+    fields = ["email", "username", "password"]
+    field_menu = TerminalMenu(fields, title="Select a field to edit:")
+    field_idx = field_menu.show()
+    if field_idx is None:
+        return
+    field = fields[field_idx]
+
+    if field == "password":
+        salt = load_salt()
+        key = derive_key_from_password(master_pw, salt)
+        current_value = decrypt_password(account["password"], key)
+        new_value = getpass.getpass(f"Current password: {current_value}\nEnter new password (leave blank to keep current): ")
+        if new_value.strip() == "":
+            print("Password unchanged.")
+            return
+        account["password"] = encrypt_password(new_value, key)
+    else:
+        current_value = account.get(field, "")
+        new_value = input(f"Current {field}: {current_value}\nEnter new {field} (leave blank to keep current): ")
+        if new_value.strip() == "":
+            print(f"{field.capitalize()} unchanged.")
+            return
+        account[field] = new_value
+
+    save_data(data)
+    print("Account updated.")
+
 def list_accounts(master_pw: str, data: dict):
     """List all saved accounts."""
     salt = load_salt()
     key = derive_key_from_password(master_pw, salt)
     for account in data["accounts"]:
         decrypted_pw = decrypt_password(account["password"], key)
+        details = []
         if account.get("email"):
-            print(f"{account['title']}: Email: {account['email']}, Password: {decrypted_pw}")
-        else:
-            print(f"{account['title']}: Username: {account['username']}, Password: {decrypted_pw}")
+            details.append(f"Email: {account['email']}")
+        if account.get("username"):
+            details.append(f"Username: {account['username']}")
+        details.append(f"Password: {decrypted_pw}")
+        print(f"{account['title']}: {', '.join(details)}")
 
 def setup_account(master_pw: str, data: dict):
     """Set up a new account with a generated password."""
@@ -263,19 +307,36 @@ def main():
         check_master_password(data)
         master_pw = login_user(data)
 
-        while True:
-            print("\nOptions: quit, save, remove, list, export")
-            choice = input("> ")
+        options = [
+           "[s] Save Account",
+            "[l] List Accounts",
+            "[r] Remove Account",
+            "[o] Export Accounts",
+            "[e] Edit Account",
+            # "[c] Change Master Password",
+            "[q] Quit"
+        ]
+        
+        main_menu = TerminalMenu(options, title="\nPassword Manager. Select an option:")
 
-            if choice == "quit":
-                break
-            elif choice == "save":
+        quitting = False
+        while not quitting:
+            selected_index = main_menu.show()
+            if selected_index is None:
+                continue # User pressed Ctrl+C ot similar
+            choice = options[selected_index]
+
+            if choice == "[q] Quit":
+                quitting = True
+            elif choice == "[s] Save Account":
                 setup_account(master_pw, data)
-            elif choice == "list":
+            elif choice == "[l] List Accounts":
                 list_accounts(master_pw, data)
-            elif choice == "remove":
+            elif choice == "[r] Remove Account":
                 remove_account(data)
-            elif choice == "export":
+            elif choice == "[e] Edit Account":
+                edit_account(master_pw, data) 
+            elif choice == "[e] Export Accounts":
                 export_accounts(master_pw, data)
             else:
                 print("Not a valid command.")
