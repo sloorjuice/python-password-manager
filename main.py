@@ -1,5 +1,6 @@
 import json, os, getpass, secrets, string, re, base64, hashlib, csv
 from cryptography.fernet import Fernet
+from simple_term_menu import TerminalMenu
 
 DATABASE_FILE = 'configs/passwords.json'
 SALT_FILE = 'configs/salt.bin'
@@ -263,19 +264,32 @@ def main():
         check_master_password(data)
         master_pw = login_user(data)
 
-        while True:
-            print("\nOptions: quit, save, remove, list, export")
-            choice = input("> ")
+        options = [
+           "[s] Save Account",
+            "[l] List Accounts",
+            "[r] Remove Account",
+            "[e] Export Accounts",
+            "[q] Quit" 
+        ]
+        
+        main_menu = TerminalMenu(options, title="\nPassword Manager. Select an option:")
 
-            if choice == "quit":
-                break
-            elif choice == "save":
+        quitting = False
+        while not quitting:
+            selected_index = main_menu.show()
+            if selected_index is None:
+                continue # User pressed Ctrl+C ot similar
+            choice = options[selected_index]
+
+            if choice == "[q] Quit":
+                quitting = True
+            elif choice == "[s] Save Account":
                 setup_account(master_pw, data)
-            elif choice == "list":
+            elif choice == "[l] List Accounts":
                 list_accounts(master_pw, data)
-            elif choice == "remove":
+            elif choice == "[r] Remove Account":
                 remove_account(data)
-            elif choice == "export":
+            elif choice == "[e] Export Accounts":
                 export_accounts(master_pw, data)
             else:
                 print("Not a valid command.")
