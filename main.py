@@ -297,7 +297,7 @@ def export_accounts(master_pw: str, data: dict):
                     "password": decrypted_password
                 }
                 writer.writerow(row)
-        print("Succesfully Exported Data.")
+        print("Successfully Exported Data.")
     except Exception as e:
         print(f"Error exporting data: {e}")
 
