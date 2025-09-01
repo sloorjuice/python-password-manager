@@ -227,7 +227,7 @@ def setup_account(master_pw: str, data: dict):
     else:
         print("Invalid choice.")
 
-def export_accounts(data: dict):
+def export_accounts(master_pw: str, data: dict):
     print("Exporting Data..")
     try:
         accounts = data.get("accounts", [])
@@ -235,12 +235,24 @@ def export_accounts(data: dict):
             print("No accounts to export..")
             return
 
-        with open("accounts.csv", mode="w", newline="", encoding="utf-8") as file:
-            fieldnames = accounts[0].keys()
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
+        fieldnames = ["title", "email", "username", "password"]
 
+        with open("accounts.csv", mode="w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
-            writer.writerows(data)
+ 
+            salt = load_salt()
+            key = derive_key_from_password(master_pw, salt)
+
+            for account in accounts:
+                decrypted_password = decrypt_password(account.get("password", ""), key)
+                row = {
+                    "title": account.get("title", ""),
+                    "email": account.get("email", ""),
+                    "username": account.get("username", ""),
+                    "password": decrypted_password
+                }
+                writer.writerow(row)
         print("Succesfully Exported Data.")
     except Exception as e:
         print(f"Error exporting data: {e}")
@@ -264,7 +276,7 @@ def main():
             elif choice == "remove":
                 remove_account(data)
             elif choice == "export":
-                export_accounts(data)
+                export_accounts(master_pw, data)
             else:
                 print("Not a valid command.")
     except KeyboardInterrupt:
