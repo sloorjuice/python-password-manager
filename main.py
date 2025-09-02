@@ -12,8 +12,11 @@ SALT_FILE = 'configs/salt.bin'
 # If you have duplicate passwords show a warning on launch
 # Save a timestamp in the json "Password Last Changed" and show a warning when a password hasnt been changed in over 30 days
 # add a setting for the Password Change Warning Time,30 days as default
+# Add a setting to hard rest to delete all passwords and data
+# Add a phone option to accounts
 
 # in settings to make a switch have an option be red[/]$Setting when unselected and green[\]Setting when selected
+#maybe switch out the slash for an empty circle and full circle ascii character
 
 # -----------------------------ENCRYPTION-----------------------------
 
