@@ -18,6 +18,21 @@ def test_validate_pw_weak():
 def test_validate_pw_empty():
     assert validate_pw("") == False
 
+def test_validate_pw_no_special_characters():
+    assert validate_pw("NoSpecialChars123") == False
+    
+def test_validate_pw_no_uppercase():
+    assert validate_pw("nocaps#123") == False
+
+def test_validate_pw_no_numbers():
+    assert validate_pw("NoNumsChars!") == False
+    
+def test_validate_pw_too_short():
+    assert validate_pw("Short1!") == False
+
+def test_validate_pw_space():
+    assert validate_pw("Space In Password1!") == False
+
 # EMAIL VALIDATION ----------------------------------------------
 
 def test_validate_email_valid():
@@ -29,8 +44,17 @@ def test_validate_email_missing_at_symbol():
 def test_validate_email_missing_domain():
     assert validate_email("test@.com") == False
 
+def test_validate_email_missing_tld():
+    assert validate_email("test@example") == False
+
 def test_validate_email_missing_username():
     assert validate_email("@example.com") == False
+
+def test_validate_email_empty():
+    assert validate_email("") == False
+
+def test_validate_email_space():
+    assert validate_email("test @example.com") == False
 
 def test_validate_email_invalid():
     assert validate_email("invalid-email") == False
