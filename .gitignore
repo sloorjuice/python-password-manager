@@ -1,4 +1,7 @@
 /venv
 /configs
+__pycache__/
+
 
 accounts.csv
+
