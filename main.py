@@ -5,6 +5,16 @@ from simple_term_menu import TerminalMenu
 DATABASE_FILE = 'configs/passwords.json'
 SALT_FILE = 'configs/salt.bin'
 
+# --------------------------------TODO--------------------------------
+
+# Change Master Password
+# Validate Master Password and show a warning "You have an insecure master password" on launch
+# If you have duplicate passwords show a warning on launch
+# Save a timestamp in the json "Password Last Changed" and show a warning when a password hasnt been changed in over 30 days
+# add a setting for the Password Change Warning Time,30 days as default
+
+# in settings to make a switch have an option be red[/]$Setting when unselected and green[\]Setting when selected
+
 # -----------------------------ENCRYPTION-----------------------------
 
 def generate_salt():
