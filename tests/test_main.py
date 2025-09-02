@@ -2,14 +2,12 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import pytest
-from unittest.mock import patch, mock_open
 from main import ( 
     validate_pw, validate_email, generate_salt, 
     derive_key_from_password, encrypt_password, decrypt_password, generate_pw
 )
 
-# PASSWORD VALIDATION
+# PASSWORD VALIDATION ----------------------------------------------
 
 def test_validate_pw_strong():
     assert validate_pw("Str0ngP@ssw0rd!_") == True
@@ -20,7 +18,7 @@ def test_validate_pw_weak():
 def test_validate_pw_empty():
     assert validate_pw("") == False
 
-# EMAIL VALIDATION
+# EMAIL VALIDATION ----------------------------------------------
 
 def test_validate_email_valid():
     assert validate_email("test@example.com") == True
@@ -37,7 +35,7 @@ def test_validate_email_missing_username():
 def test_validate_email_invalid():
     assert validate_email("invalid-email") == False
 
-# PASSWORD GENERATION
+# PASSWORD GENERATION ----------------------------------------------
 
 def test_generate_pw_length():
     pw = generate_pw()
@@ -50,7 +48,7 @@ def test_generate_pw_variety():
     assert any(c.isdigit() for c in pw)
     assert any(not c.isalnum() for c in pw)
 
-# ENCRYPTION
+# ENCRYPTION ----------------------------------------------
 
 def test_encrypt_decrypt_roundtrip():
     password = "Test123!@#"
