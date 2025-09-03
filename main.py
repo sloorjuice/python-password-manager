@@ -185,8 +185,8 @@ def save_account(title: str, identifier: str, pw: str, account_type: str, mpw: s
         "title": title,
         account_type: identifier,
         "password": encrypted_pw,
-        "Account Created": str(datetime.datetime.now()),
-        "Password Last Changed": str(datetime.datetime.now())
+        "account created": str(datetime.datetime.now()),
+        "password last changed": str(datetime.datetime.now())
     }
 
     data["accounts"].append(new_account)
@@ -236,6 +236,7 @@ def edit_account(master_pw: str, data: dict):
             print("Password unchanged.")
             return
         account["password"] = encrypt_password(new_value, key)
+        account["password last changed"] = str(datetime.datetime.now())
     else:
         current_value = account.get(field, "")
         new_value = input(f"Current {field}: {current_value}\nEnter new {field} (leave blank to keep current): ")
