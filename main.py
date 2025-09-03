@@ -1,4 +1,4 @@
-import json, os, getpass, secrets, string, re, base64, hashlib, csv
+import json, os, getpass, secrets, string, re, base64, hashlib, csv, datetime, time
 from cryptography.fernet import Fernet
 from simple_term_menu import TerminalMenu
 
@@ -88,7 +88,7 @@ def save_data(data: dict):
     except Exception as e:
         print(f"Error trying to save data: {e}")
 
-def check_master_password(data: dict):
+def setup_master_password(data: dict):
     """
     Get the master password from the user.
     If no master password set one up.
@@ -112,6 +112,10 @@ def check_master_password(data: dict):
         data["accounts"] = [] # ensure accounts section exists
         save_data(data)
         print("Master password set!")
+
+def reset_master_password(data: dict):
+    del data["master"]
+    setup_master_password(data)
 
 # -----------------------------ACCOUNT MANAGEMENT-----------------------------
 
@@ -176,10 +180,13 @@ def save_account(title: str, identifier: str, pw: str, account_type: str, mpw: s
     salt = load_salt()
     key = derive_key_from_password(mpw, salt)
     encrypted_pw = encrypt_password(pw, key)
+
     new_account = {
         "title": title,
         account_type: identifier,
-        "password": encrypted_pw
+        "password": encrypted_pw,
+        "Account Created": str(datetime.datetime.now()),
+        "Password Last Changed": str(datetime.datetime.now())
     }
 
     data["accounts"].append(new_account)
@@ -317,7 +324,7 @@ def export_accounts(master_pw: str, data: dict):
 def main():
     try:
         data = load_data()
-        check_master_password(data)
+        setup_master_password(data)
         master_pw = login_user(data)
 
         options = [
@@ -326,7 +333,7 @@ def main():
             "[r] Remove Account",
             "[e] Edit Account",
             "[o] Export Accounts",
-            # "[c] Change Master Password",
+            "[c] Change Master Password",
             "[q] Quit"
         ]
         
@@ -351,6 +358,8 @@ def main():
                 edit_account(master_pw, data) 
             elif choice == "[o] Export Accounts":
                 export_accounts(master_pw, data)
+            elif choice == "[c] Change Master Password":
+                reset_master_password(data)
             else:
                 print("Not a valid command.")
     except KeyboardInterrupt:
