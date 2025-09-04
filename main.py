@@ -220,7 +220,7 @@ def edit_account(master_pw: str, data: dict):
         return
     account = accounts[idx]
     
-    fields = ["email", "username", "password"]
+    fields = ["email", "username", "phone", "password"]
     field_menu = TerminalMenu(fields, title="Select a field to edit:")
     field_idx = field_menu.show()
     if field_idx is None:
